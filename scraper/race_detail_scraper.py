@@ -43,6 +43,26 @@ for race in races:
     driver.switch_to.default_content()
     driver.get(url)
 
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+
+    WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((By.TAG_NAME, "table"))
+    )
+
+horses = driver.find_elements(By.CSS_SELECTOR, ".horsetable tbody tr")
+
+for horse in horses:
+    cols = horse.find_elements(By.TAG_NAME, "td")
+
+    if len(cols) > 5:
+        horse_name = cols[3].text
+        jockey = cols[4].text
+        trainer = cols[5].text
+        draw = cols[2].text
+
+        print(horse_name, jockey, trainer, draw)
+
     try:
         WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.TAG_NAME, "table"))
@@ -57,19 +77,27 @@ for race in races:
 
     soup = BeautifulSoup(html, "html.parser")
 
-    tables = soup.select("table")
+    tables = soup.select("table.f_fs13")
 
     print("Tables found:", len(tables))
 
-    table = tables[0]
-    rows = table.select("tr")
+    tables = driver.find_elements(By.TAG_NAME, "table")
 
-    for row in rows:
-        cols = row.select("td")
-        data = [c.text.strip() for c in cols]
+    print("Tables found:", len(tables))
 
-        if data:
-            print(data)
+    for table in tables:
+        rows = table.find_elements(By.TAG_NAME, "tr")
+
+        for row in rows:
+            cols = row.find_elements(By.TAG_NAME, "td")
+
+            if len(cols) >= 10:
+                horse_name = cols[3].text
+                jockey = cols[4].text
+                trainer = cols[5].text
+                draw = cols[2].text
+
+                print(horse_name, jockey, trainer, draw)
 
     for i, table in enumerate(tables):
         print("TABLE", i)
